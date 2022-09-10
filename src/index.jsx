@@ -133,8 +133,8 @@ const App = () => {
       new MazeCol(0, 0, 1, 0),
       new MazeCol(1, 0, 1, 0),
       new MazeCol(0, 0, 1, 0),
-      new MazeCol(0 ,1, 1, 0),
-    ]
+      new MazeCol(0, 1, 1, 0),
+    ],
   ]);
   const getMazeWallBorder = (mazeCol) => {
     let mazeWallBorder = '';
@@ -153,7 +153,7 @@ const App = () => {
   const renderMazeInfo = (rowIndex, colIndex) => {
     const getPositionIsMatch = ({ x, y }) => (
       x === colIndex && y === rowIndex
-    )
+    );
     if (getPositionIsMatch(characterPosition)) {
       if (isCharacterCollision) return '😵';
       return '🤑';
@@ -161,26 +161,9 @@ const App = () => {
     if (getPositionIsMatch(mazeInfo.end)) {
       return '💰';
     }
-  }
-  const checkCharacterMoveable = ({ keyCode }) => {
-    let result = false;
-    switch (keyCode) {
-      case 38:
-        result = getIsCharacterCollision(characterPosition, 'top');
-        break;
-      case 39:
-        result = getIsCharacterCollision(characterPosition, 'right');
-        break;
-      case 40:
-        result = getIsCharacterCollision(characterPosition, 'bottom');
-        break;
-      case 37:
-        result = getIsCharacterCollision(characterPosition, 'left');
-        break;
-      default:
-    }
-    return !result;
-  }
+
+    return '';
+  };
 
   const moveCharacter = ({ keyCode }) => {
     const offset = { x: 0, y: 0 };
@@ -208,17 +191,17 @@ const App = () => {
     if (!maze[y][x][moveDirection]) {
       setCharacterPosition({
         x: x + offset.x,
-        y: y + offset.y
+        y: y + offset.y,
       });
     }
     setIsCharacterCollision(maze[y][x][moveDirection]);
-  }
+  };
 
   useEffect(() => {
     window.addEventListener('keydown', moveCharacter);
     return () => {
       window.removeEventListener('keydown', moveCharacter);
-    }
+    };
   }, [characterPosition]);
 
   return (
