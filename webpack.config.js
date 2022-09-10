@@ -9,7 +9,7 @@ module.exports = {
   output: {
     filename: `js/bundle_${new Date().getTime()}.js`,
     path: path.resolve(__dirname, './dist/'),
-    publicPath: '/',
+    publicPath: './',
   },
   resolve: {
     extensions: ['.js', '.jsx'],
