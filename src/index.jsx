@@ -1,6 +1,6 @@
 import 'regenerator-runtime/runtime';
 import 'core-js/stable';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import '@/plugins/tailwind.css';
 
@@ -146,7 +146,7 @@ const App = () => {
   };
 
   const [mazeInfo] = useState({
-    end: { x: 9, y: 6 }
+    end: { x: 9, y: 6 },
   });
   const [characterPosition, setCharacterPosition] = useState({ x: 0, y: 5 });
   const [isCharacterCollision, setIsCharacterCollision] = useState(false);
@@ -163,6 +163,15 @@ const App = () => {
     }
 
     return '';
+  };
+
+  const mazeContainer = useRef(null);
+  const shakeMazeContainer = () => {
+    mazeContainer.current.classList.add('animate-shake');
+    const ANIMATION_TIME = 100;
+    setTimeout(() => {
+      mazeContainer.current.classList.remove('animate-shake');
+    }, ANIMATION_TIME);
   };
 
   const moveCharacter = ({ keyCode }) => {
@@ -188,7 +197,9 @@ const App = () => {
       default:
     }
     const { x, y } = characterPosition;
-    if (!maze[y][x][moveDirection]) {
+    if (maze[y][x][moveDirection]) {
+      shakeMazeContainer();
+    } else {
       setCharacterPosition({
         x: x + offset.x,
         y: y + offset.y,
@@ -203,36 +214,40 @@ const App = () => {
       window.removeEventListener('keydown', moveCharacter);
     };
   }, [characterPosition]);
-
   return (
     <div className="w-full h-full bg-amber-100 py-8 flex flex-col items-center">
       <h1 className="text-sky-700 text-6xl my-12 text-center">MAZE</h1>
-      <div className="w-80 h-80">
-        {
-          maze.map((row, rowIndex) => (
-            <div className="w-full h-8 flex flex-row -mt-0.5">
-              {
-                row.map((col, colIndex) => (
-                  <div
-                    className={`
-                      w-8
-                      h-8
-                      text-center
-                      flex-1
-                      border-solid
-                      border-sky-700
-                      border-2
-                      -ml-0.5
-                      ${getMazeWallBorder(col)}
-                    `}
-                  >
-                    { renderMazeInfo(rowIndex, colIndex) }
-                  </div>
-                ))
-              }
-            </div>
-          ))
-        }
+      <div className="w-80 h-80 relative">
+        <div
+          ref={mazeContainer}
+          className="w-full h-full absolute top-0 left-0 transition-all"
+        >
+          {
+            maze.map((row, rowIndex) => (
+              <div className="w-full h-8 flex flex-row -mt-0.5">
+                {
+                  row.map((col, colIndex) => (
+                    <div
+                      className={`
+                        w-8
+                        h-8
+                        text-center
+                        flex-1
+                        border-solid
+                        border-sky-700
+                        border-2
+                        -ml-0.5
+                        ${getMazeWallBorder(col)}
+                      `}
+                    >
+                      { renderMazeInfo(rowIndex, colIndex) }
+                    </div>
+                  ))
+                }
+              </div>
+            ))
+          }
+        </div>
       </div>
     </div>
   );
