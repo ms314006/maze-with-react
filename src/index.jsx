@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import 'regenerator-runtime/runtime';
 import 'core-js/stable';
 import React, { useState, useEffect, useRef } from 'react';
@@ -146,15 +147,24 @@ const App = () => {
   };
 
   const [mazeInfo] = useState({
+    start: { x: 0, y: 5 },
     end: { x: 9, y: 6 },
   });
-  const [characterPosition, setCharacterPosition] = useState({ x: 0, y: 5 });
+  const [characterPosition, setCharacterPosition] = useState({ ...mazeInfo.start });
   const [isCharacterCollision, setIsCharacterCollision] = useState(false);
+  const [characterCollisionCount, setCharacterCollisionCount] = useState(0);
+  const [isFinishedMaze, setIsFinishedMaze] = useState(false);
+  const CHARACTER_HP = 10;
+  const characterAlreadyDead = characterCollisionCount >= CHARACTER_HP;
+  const mainColor = characterAlreadyDead ? 'sky-900' : 'amber-100';
+  const minorColor = characterAlreadyDead ? 'red-500' : 'sky-700';
   const renderMazeInfo = (rowIndex, colIndex) => {
     const getPositionIsMatch = ({ x, y }) => (
       x === colIndex && y === rowIndex
     );
     if (getPositionIsMatch(characterPosition)) {
+      if (isFinishedMaze) return '🤩';
+      if (characterAlreadyDead) return '👻';
       if (isCharacterCollision) return '😵';
       return '🤑';
     }
@@ -175,6 +185,7 @@ const App = () => {
   };
 
   const moveCharacter = ({ keyCode }) => {
+    if (isFinishedMaze) return;
     const offset = { x: 0, y: 0 };
     let moveDirection = null;
     switch (keyCode) {
@@ -199,6 +210,11 @@ const App = () => {
     const { x, y } = characterPosition;
     if (maze[y][x][moveDirection]) {
       shakeMazeContainer();
+      setCharacterCollisionCount(
+        currentCharacterCollisionCount => (
+          currentCharacterCollisionCount + 1
+        ),
+      );
     } else {
       setCharacterPosition({
         x: x + offset.x,
@@ -210,13 +226,37 @@ const App = () => {
 
   useEffect(() => {
     window.addEventListener('keydown', moveCharacter);
+    const { x: endX, y: endY } = mazeInfo.end;
+    if (characterPosition.x === endX && characterPosition.y === endY) {
+      setIsFinishedMaze(true);
+    }
     return () => {
       window.removeEventListener('keydown', moveCharacter);
     };
-  }, [characterPosition]);
+  }, [characterPosition, characterCollisionCount, isFinishedMaze]);
+
+  const initMaze = () => {
+    setCharacterPosition({ ...mazeInfo.start });
+    setIsCharacterCollision(false);
+    setIsFinishedMaze(false);
+    setCharacterCollisionCount(0);
+  };
+  useEffect(initMaze, []);
   return (
-    <div className="w-full h-full bg-amber-100 py-8 flex flex-col items-center">
-      <h1 className="text-sky-700 text-6xl my-12 text-center">MAZE</h1>
+    <div
+      className={`
+        w-full
+        h-full
+        flex
+        flex-col
+        items-center
+        transition-all
+        bg-${mainColor}
+      `}
+    >
+      <h1 className={`text-${minorColor} text-6xl my-12 text-center`}>
+        MAZE
+      </h1>
       <div className="w-80 h-80 relative">
         <div
           ref={mazeContainer}
@@ -224,21 +264,15 @@ const App = () => {
         >
           {
             maze.map((row, rowIndex) => (
-              <div className="w-full h-8 flex flex-row -mt-0.5">
+              <div
+                key={rowIndex}
+                className="w-full h-8 flex flex-row -mt-0.5"
+              >
                 {
                   row.map((col, colIndex) => (
                     <div
-                      className={`
-                        w-8
-                        h-8
-                        text-center
-                        flex-1
-                        border-solid
-                        border-sky-700
-                        border-2
-                        -ml-0.5
-                        ${getMazeWallBorder(col)}
-                      `}
+                      key={colIndex}
+                      className={`w-8 h-8 text-center flex-1 border-solid transition-all border-2 -ml-0.5 border-${minorColor} ${getMazeWallBorder(col)}`}
                     >
                       { renderMazeInfo(rowIndex, colIndex) }
                     </div>
@@ -249,6 +283,22 @@ const App = () => {
           }
         </div>
       </div>
+      {
+        isFinishedMaze && (
+          <div className="w-full h-full bg-black/50 absolute flex justify-center items-center">
+            <div className={`w-72 h-48 bg-${mainColor} rounded-xl border-4 border-${minorColor} flex flex-col justify-center items-center`}>
+              <h2 className={`text-${minorColor} text-4xl font-bold`}>Finished!</h2>
+              <button
+                type="button"
+                className={`bg-${mainColor} rounded border-2 border-${minorColor} mt-8 py-2 px-4 text-${minorColor}`}
+                onClick={initMaze}
+              >
+                PLAY AGAIN
+              </button>
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 };
