@@ -145,10 +145,7 @@ const App = () => {
     if (!mazeCol.left) mazeWallBorder += 'border-l-transparent ';
     return mazeWallBorder;
   };
-  const getColors = characterAlreadyDead => ({
-    main: characterAlreadyDead ? 'sky-900' : 'amber-100',
-    minor: characterAlreadyDead ? 'red-500' : 'sky-700',
-  });
+
   const [mazeInfo] = useState({
     start: { x: 0, y: 5 },
     end: { x: 9, y: 6 },
@@ -159,6 +156,9 @@ const App = () => {
   const [isFinishedMaze, setIsFinishedMaze] = useState(false);
   const CHARACTER_HP = 10;
   const characterAlreadyDead = characterCollisionCount >= CHARACTER_HP;
+  const mainBackgroundColor = characterAlreadyDead ? 'bg-sky-900' : 'bg-amber-100';
+  const minorBorderColor = characterAlreadyDead ? 'border-red-500' : 'border-sky-700';
+  const minorTextColor = characterAlreadyDead ? 'text-red-500' : 'text-sky-700';
   const renderMazeInfo = (rowIndex, colIndex) => {
     const getPositionIsMatch = ({ x, y }) => (
       x === colIndex && y === rowIndex
@@ -252,10 +252,10 @@ const App = () => {
         flex-col
         items-center
         transition-all
-        bg-${getColors().main}
+        ${mainBackgroundColor}
       `}
     >
-      <h1 className={`text-${getColors().minor} text-6xl my-12 text-center`}>
+      <h1 className={`${minorTextColor} text-6xl my-12 text-center`}>
         MAZE
       </h1>
       <div className="w-80 h-80 relative">
@@ -273,7 +273,7 @@ const App = () => {
                   row.map((col, colIndex) => (
                     <div
                       key={colIndex}
-                      className={`w-8 h-8 text-center flex-1 border-solid transition-all border-2 -ml-0.5 border-${getColors().minor} ${getMazeWallBorder(col)}`}
+                      className={`w-8 h-8 text-center flex-1 border-solid transition-all border-2 -ml-0.5 ${minorBorderColor} ${getMazeWallBorder(col)}`}
                     >
                       { renderMazeInfo(rowIndex, colIndex) }
                     </div>
@@ -287,11 +287,11 @@ const App = () => {
       {
         isFinishedMaze && (
           <div className="w-full h-full bg-black/50 absolute flex justify-center items-center">
-            <div className={`w-72 h-48 bg-${getColors().main} rounded-xl border-4 border-${getColors().minor} flex flex-col justify-center items-center`}>
-              <h2 className={`text-${getColors().minor} text-4xl font-bold`}>Finished!</h2>
+            <div className={`w-72 h-48 ${mainBackgroundColor} rounded-xl border-4 ${minorBorderColor} flex flex-col justify-center items-center`}>
+              <h2 className={`${minorTextColor} text-4xl font-bold`}>Finished!</h2>
               <button
                 type="button"
-                className={`bg-${getColors().main} rounded border-2 border-${getColors().minor} mt-8 py-2 px-4 text-${getColors().minor}`}
+                className={`${mainBackgroundColor} rounded border-2 ${minorBorderColor} mt-8 py-2 px-4 ${minorTextColor}`}
                 onClick={initMaze}
               >
                 PLAY AGAIN
