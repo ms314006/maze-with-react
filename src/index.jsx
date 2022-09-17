@@ -149,7 +149,7 @@ const App = () => {
   const [mazeInfo] = useState({
     start: { x: 0, y: 5 },
     end: { x: 9, y: 6 },
-    cheatPoint: { x: 3, y: 8 },
+    cheatPoint: { x: 3, y: 6 },
   });
   const [characterPosition, setCharacterPosition] = useState({ ...mazeInfo.start });
   const [isCharacterCollision, setIsCharacterCollision] = useState(false);
