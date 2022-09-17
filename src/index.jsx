@@ -149,10 +149,12 @@ const App = () => {
   const [mazeInfo] = useState({
     start: { x: 0, y: 5 },
     end: { x: 9, y: 6 },
+    cheatPoint: { x: 3, y: 8 },
   });
   const [characterPosition, setCharacterPosition] = useState({ ...mazeInfo.start });
   const [isCharacterCollision, setIsCharacterCollision] = useState(false);
   const [characterCollisionCount, setCharacterCollisionCount] = useState(0);
+  const [enabledCheatModal, setEnabledCheatModal] = useState(false);
   const [isFinishedMaze, setIsFinishedMaze] = useState(false);
   const CHARACTER_HP = 10;
   const characterAlreadyDead = characterCollisionCount >= CHARACTER_HP;
@@ -165,6 +167,7 @@ const App = () => {
     );
     if (getPositionIsMatch(characterPosition)) {
       if (isFinishedMaze) return '🤩';
+      if (enabledCheatModal) return '👽';
       if (characterAlreadyDead) return '👻';
       if (isCharacterCollision) return '😵';
       return '🤑';
@@ -209,8 +212,17 @@ const App = () => {
       default:
     }
     const { x, y } = characterPosition;
-    if (maze[y][x][moveDirection]) {
+    if (
+      (maze[y][x][moveDirection] && !enabledCheatModal)
+      || (x === 0 && moveDirection === 'left')
+      || (x === maze[0].length - 1 && moveDirection === 'right')
+      || (y === 0 && moveDirection === 'top')
+      || (y === maze.length - 1 && moveDirection === 'bottom')
+    ) {
       shakeMazeContainer();
+      if (x === mazeInfo.cheatPoint.x && y === mazeInfo.cheatPoint.y) {
+        setEnabledCheatModal(true);
+      }
       setCharacterCollisionCount(
         currentCharacterCollisionCount => (
           currentCharacterCollisionCount + 1
@@ -240,6 +252,7 @@ const App = () => {
     setCharacterPosition({ ...mazeInfo.start });
     setIsCharacterCollision(false);
     setIsFinishedMaze(false);
+    setEnabledCheatModal(false);
     setCharacterCollisionCount(0);
   };
   useEffect(initMaze, []);
